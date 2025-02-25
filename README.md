@@ -2,6 +2,8 @@
 
 This is a lightweight Model Control Protocol (MCP) server bootstrapped with [create-mcp](https://github.com/zueai/create-mcp), and deployed on Cloudflare Workers.
 
+This MCP Server allows agents (like Cursor Agents) to interact with the [WorkOS API](https://workos.com/docs/reference).
+
 ## Available Tools
 
 See [src/index.ts](src/index.ts) for the current list of tools. Every method in the class is an MCP tool.
@@ -11,7 +13,7 @@ See [src/index.ts](src/index.ts) for the current list of tools. Every method in 
 1. Run the automated install script to clone this MCP server and deploy it to your Cloudflare account:
 
 ```bash
-bun create mcp --clone https://github.com/your-username/workos-mcp
+bun create mcp --clone https://github.com/zueai/workos-mcp
 ```
 
 2. Open `Cursor Settings -> MCP -> Add new MCP server` and paste the command that was copied to your clipboard.
@@ -63,3 +65,4 @@ Check out the following resources to learn more:
 - [Model Control Protocol Documentation](https://modelcontextprotocol.io) - learn about the model control protocol
 - [workers-mcp](https://github.com/cloudflare/workers-mcp) - the package that implements the MCP protocol for Cloudflare Workers
 - [Cloudflare Workers documentation](https://developers.cloudflare.com/workers/) - learn about the Cloudflare Workers platform
+- [WorkOS Documentation](https://workos.com/docs) - learn about the WorkOS API
