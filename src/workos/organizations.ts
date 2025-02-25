@@ -1,0 +1,91 @@
+import { WorkOS } from "@workos-inc/node"
+import type {
+	CreateOrganizationOptions,
+	CreateOrganizationRequestOptions,
+	ListOrganizationsOptions,
+	UpdateOrganizationOptions
+} from "@workos-inc/node"
+import { MCPResponse } from "../utils"
+
+export async function listOrganizations(
+	env: Env,
+	domains?: string[],
+	limit?: number,
+	before?: string,
+	after?: string
+) {
+	const workos = new WorkOS(env.WORKOS_API_KEY)
+
+	const options: ListOrganizationsOptions = {}
+	if (domains) options.domains = domains
+	if (limit) options.limit = limit
+	if (before) options.before = before
+	if (after) options.after = after
+
+	const organizations = await workos.organizations.listOrganizations(options)
+
+	return MCPResponse(organizations)
+}
+
+export async function createOrganization(
+	env: Env,
+	payload: CreateOrganizationOptions,
+	requestOptions?: CreateOrganizationRequestOptions
+) {
+	const workos = new WorkOS(env.WORKOS_API_KEY)
+
+	const organization = await workos.organizations.createOrganization(
+		payload,
+		requestOptions
+	)
+
+	return MCPResponse(organization)
+}
+
+export async function deleteOrganization(env: Env, id: string) {
+	const workos = new WorkOS(env.WORKOS_API_KEY)
+
+	await workos.organizations.deleteOrganization(id)
+
+	return MCPResponse({ success: true, id })
+}
+
+export async function getOrganization(env: Env, id: string) {
+	const workos = new WorkOS(env.WORKOS_API_KEY)
+
+	const organization = await workos.organizations.getOrganization(id)
+
+	return MCPResponse(organization)
+}
+
+export async function updateOrganization(
+	env: Env,
+	options: UpdateOrganizationOptions
+) {
+	const workos = new WorkOS(env.WORKOS_API_KEY)
+
+	const organization = await workos.organizations.updateOrganization(options)
+
+	return MCPResponse(organization)
+}
+
+export async function listOrganizationRoles(
+	env: Env,
+	organizationId: string,
+	limit?: number,
+	after?: string,
+	before?: string
+) {
+	const workos = new WorkOS(env.WORKOS_API_KEY)
+
+	const options = {
+		organizationId,
+		limit,
+		after,
+		before
+	}
+
+	const roles = await workos.organizations.listOrganizationRoles(options)
+
+	return MCPResponse(roles)
+}
