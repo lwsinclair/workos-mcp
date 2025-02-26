@@ -18,10 +18,11 @@ bun create mcp --clone https://github.com/zueai/workos-mcp
 
 2. Open `Cursor Settings -> MCP -> Add new MCP server` and paste the command that was copied to your clipboard.
 
-3. (Optional) Upload any secrets:
+3. Upload your WorkOS API key and client ID as secrets:
 
 ```bash
-bunx wrangler secret put MY_API_KEY
+bunx wrangler secret put WORKOS_API_KEY
+bunx wrangler secret put WORKOS_CLIENT_ID
 ```
 
 ## Deploying Changes
