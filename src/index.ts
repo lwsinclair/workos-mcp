@@ -3,7 +3,9 @@ import type { EventName } from "@workos-inc/node"
 import type {
 	CreateOrganizationOptions,
 	CreateOrganizationRequestOptions,
-	UpdateOrganizationOptions
+	CreateUserOptions,
+	UpdateOrganizationOptions,
+	UpdateUserOptions
 } from "@workos-inc/node"
 import { ProxyToSelf } from "workers-mcp"
 import { listEvents } from "./workos/events"
@@ -11,10 +13,17 @@ import {
 	createOrganization,
 	deleteOrganization,
 	getOrganization,
-	listOrganizationRoles,
 	listOrganizations,
 	updateOrganization
 } from "./workos/organizations"
+import { listOrganizationRoles } from "./workos/roles"
+import {
+	createUser,
+	deleteUser,
+	getUser,
+	listUsers,
+	updateUser
+} from "./workos/users"
 
 export default class MyWorker extends WorkerEntrypoint<Env> {
 	/**
@@ -204,5 +213,123 @@ export default class MyWorker extends WorkerEntrypoint<Env> {
 			after,
 			before
 		)
+	}
+
+	/**
+	 * List users from the WorkOS API.
+	 * @param email {string} Optional email to filter users by.
+	 * @param organizationId {string} Optional organization ID to filter users by.
+	 * @param limit {number} Optional limit on number of users to return (1-100, default 10).
+	 * @param before {string} Optional cursor for pagination (getting previous results).
+	 * @param after {string} Optional cursor for pagination (getting next results).
+	 * @return {Promise<any>} List of users matching the criteria, including pagination metadata and user objects with:
+	 *  - id {string} - The user's unique identifier
+	 *  - email {string} - The user's email address
+	 *  - emailVerified {boolean} - Whether the email has been verified
+	 *  - firstName {string|null} - The user's first name, if provided
+	 *  - lastName {string|null} - The user's last name, if provided
+	 *  - profilePictureUrl {string|null} - URL to the user's profile picture, if available
+	 *  - lastSignInAt {string|null} - ISO timestamp of the user's last sign-in
+	 *  - createdAt {string} - ISO timestamp of creation
+	 *  - updatedAt {string} - ISO timestamp of last update
+	 */
+	async listUsers(
+		email?: string,
+		organizationId?: string,
+		limit?: number,
+		before?: string,
+		after?: string
+	) {
+		return await listUsers(
+			this.env,
+			email,
+			organizationId,
+			limit,
+			before,
+			after
+		)
+	}
+
+	/**
+	 * Get a user from the WorkOS API by ID.
+	 * @param userId {string} The ID of the user to retrieve (format: "user_...").
+	 * @return {Promise<any>} The user details with the following properties:
+	 *  - id {string} - The user's unique identifier
+	 *  - email {string} - The user's email address
+	 *  - emailVerified {boolean} - Whether the email has been verified
+	 *  - firstName {string|null} - The user's first name, if provided
+	 *  - lastName {string|null} - The user's last name, if provided
+	 *  - profilePictureUrl {string|null} - URL to the user's profile picture, if available
+	 *  - lastSignInAt {string|null} - ISO timestamp of the user's last sign-in
+	 *  - createdAt {string} - ISO timestamp of creation
+	 *  - updatedAt {string} - ISO timestamp of last update
+	 */
+	async getUser(userId: string) {
+		return await getUser(this.env, userId)
+	}
+
+	/**
+	 * Create a new user in WorkOS.
+	 * @param payload {string} JSON string with user details. Format:
+	 *  {
+	 *    "email": "user@example.com", // Required: The user's email address
+	 *    "password": "securepassword", // Optional: Password for the user
+	 *    "firstName": "John", // Optional: User's first name
+	 *    "lastName": "Doe", // Optional: User's last name
+	 *    "emailVerified": true // Optional: Whether the email should be marked as verified (default: false)
+	 *  }
+	 * @return {Promise<any>} The created user with the following properties:
+	 *  - id {string} - The user's unique identifier
+	 *  - email {string} - The user's email address
+	 *  - emailVerified {boolean} - Whether the email has been verified
+	 *  - firstName {string|null} - The user's first name, if provided
+	 *  - lastName {string|null} - The user's last name, if provided
+	 *  - profilePictureUrl {string|null} - URL to the user's profile picture, if available
+	 *  - lastSignInAt {string|null} - ISO timestamp of the user's last sign-in
+	 *  - createdAt {string} - ISO timestamp of creation
+	 *  - updatedAt {string} - ISO timestamp of last update
+	 */
+	async createUser(payload: string) {
+		// Parse the JSON string
+		const parsedPayload = JSON.parse(payload) as CreateUserOptions
+
+		return await createUser(this.env, parsedPayload)
+	}
+
+	/**
+	 * Update a user in WorkOS.
+	 * @param options {string} JSON string with update options. Format:
+	 *  {
+	 *    "userId": "user_123", // Required: The ID of the user to update
+	 *    "firstName": "New Name", // Optional: New first name for the user
+	 *    "lastName": "New Last Name", // Optional: New last name for the user
+	 *    "emailVerified": true, // Optional: Whether the email should be marked as verified
+	 *    "password": "newpassword" // Optional: New password for the user
+	 *  }
+	 * @return {Promise<any>} The updated user with the following properties:
+	 *  - id {string} - The user's unique identifier
+	 *  - email {string} - The user's email address
+	 *  - emailVerified {boolean} - Whether the email has been verified (updated if changed)
+	 *  - firstName {string|null} - The user's first name (updated if changed)
+	 *  - lastName {string|null} - The user's last name (updated if changed)
+	 *  - profilePictureUrl {string|null} - URL to the user's profile picture, if available
+	 *  - lastSignInAt {string|null} - ISO timestamp of the user's last sign-in
+	 *  - createdAt {string} - ISO timestamp of creation
+	 *  - updatedAt {string} - ISO timestamp of last update
+	 */
+	async updateUser(options: string) {
+		// Parse the JSON string
+		const parsedOptions = JSON.parse(options) as UpdateUserOptions
+
+		return await updateUser(this.env, parsedOptions)
+	}
+
+	/**
+	 * Delete a user from WorkOS.
+	 * @param userId {string} The ID of the user to delete (format: "user_...").
+	 * @return {Promise<any>} Confirmation of deletion with success status and the deleted user ID.
+	 */
+	async deleteUser(userId: string) {
+		return await deleteUser(this.env, userId)
 	}
 }

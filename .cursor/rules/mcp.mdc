@@ -161,3 +161,12 @@ Most of your implementation files (like `cloudflare/zones.ts`) should handle the
 ## Deployment
 
 Run `bun run deploy` to deploy your changes to Cloudflare Workers.
+
+## Correct Types from SDK:
+
+You can search the d.ts files in the SDK to find the methods and types like this:
+
+Example for Organizations: 
+`/node_modules/@workos-inc/node/lib/organizations/organizations.d.ts`
+
+This file will usually import the types too, so you can follow that to find the correct types.
