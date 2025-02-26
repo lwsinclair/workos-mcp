@@ -58,3 +58,11 @@ export async function deleteUser(env: Env, userId: string) {
 
 	return MCPResponse({ success: true, id: userId })
 }
+
+export async function listIdentities(env: Env, userId: string) {
+	const workos = getWorkOSClient(env)
+
+	const identities = await workos.userManagement.getUserIdentities(userId)
+
+	return MCPResponse(identities)
+}

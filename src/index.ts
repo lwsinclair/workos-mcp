@@ -1,14 +1,26 @@
 import { WorkerEntrypoint } from "cloudflare:workers"
 import type { EventName } from "@workos-inc/node"
 import type {
+	CreateOrganizationMembershipOptions,
 	CreateOrganizationOptions,
 	CreateOrganizationRequestOptions,
 	CreateUserOptions,
+	OrganizationMembershipStatus,
+	UpdateOrganizationMembershipOptions,
 	UpdateOrganizationOptions,
 	UpdateUserOptions
 } from "@workos-inc/node"
 import { ProxyToSelf } from "workers-mcp"
 import { listEvents } from "./workos/events"
+import {
+	createOrganizationMembership,
+	deactivateOrganizationMembership,
+	deleteOrganizationMembership,
+	getOrganizationMembership,
+	listOrganizationMemberships,
+	reactivateOrganizationMembership,
+	updateOrganizationMembership
+} from "./workos/memberships"
 import {
 	createOrganization,
 	deleteOrganization,
@@ -21,6 +33,7 @@ import {
 	createUser,
 	deleteUser,
 	getUser,
+	listIdentities,
 	listUsers,
 	updateUser
 } from "./workos/users"
@@ -331,5 +344,132 @@ export default class MyWorker extends WorkerEntrypoint<Env> {
 	 */
 	async deleteUser(userId: string) {
 		return await deleteUser(this.env, userId)
+	}
+
+	/**
+	 * List identities for a user in WorkOS.
+	 * @param userId {string} The ID of the user to list identities for (format: "user_...").
+	 * @return {Promise<any>} List of identities for the user.
+	 */
+	async listIdentities(userId: string) {
+		return await listIdentities(this.env, userId)
+	}
+
+	/**
+	 * Get an organization membership from WorkOS by ID.
+	 * @param membershipId {string} The ID of the organization membership to retrieve (format: "om_...").
+	 * @return {Promise<any>} The organization membership details with the following properties:
+	 *  - id {string} - The membership's unique identifier
+	 *  - organizationId {string} - The ID of the organization
+	 *  - userId {string} - The ID of the user
+	 *  - status {string} - The status of the membership (active, inactive, or pending)
+	 *  - role {object} - The role assigned to the user in the organization
+	 *  - createdAt {string} - ISO timestamp of creation
+	 *  - updatedAt {string} - ISO timestamp of last update
+	 */
+	async getOrganizationMembership(membershipId: string) {
+		return await getOrganizationMembership(this.env, membershipId)
+	}
+
+	/**
+	 * List organization memberships from the WorkOS API.
+	 * @param organizationId {string} Optional organization ID to filter memberships by.
+	 * @param userId {string} Optional user ID to filter memberships by.
+	 * @param statuses {string} Optional JSON string array of statuses to filter by. Format: ["active", "inactive", "pending"]
+	 * @param limit {number} Optional limit on number of memberships to return (1-100, default 10).
+	 * @param before {string} Optional cursor for pagination (getting previous results).
+	 * @param after {string} Optional cursor for pagination (getting next results).
+	 * @return {Promise<any>} List of organization memberships matching the criteria.
+	 */
+	async listOrganizationMemberships(
+		organizationId?: string,
+		userId?: string,
+		statuses?: string,
+		limit?: number,
+		before?: string,
+		after?: string
+	) {
+		// Parse the JSON string to get the array of statuses if provided
+		const parsedStatuses = statuses
+			? (JSON.parse(statuses) as string[])
+			: undefined
+
+		return await listOrganizationMemberships(
+			this.env,
+			organizationId,
+			userId,
+			parsedStatuses,
+			limit,
+			before,
+			after
+		)
+	}
+
+	/**
+	 * Create a new organization membership in WorkOS.
+	 * @param payload {string} JSON string with membership details. Format:
+	 *  {
+	 *    "organizationId": "org_123", // Required: The ID of the organization
+	 *    "userId": "user_123", // Required: The ID of the user
+	 *    "roleSlug": "admin" // Optional: The slug of the role to assign to the user
+	 *  }
+	 * @return {Promise<any>} The created organization membership.
+	 */
+	async createOrganizationMembership(payload: string) {
+		// Parse the JSON string
+		const parsedPayload = JSON.parse(
+			payload
+		) as CreateOrganizationMembershipOptions
+
+		return await createOrganizationMembership(this.env, parsedPayload)
+	}
+
+	/**
+	 * Update an organization membership in WorkOS.
+	 * @param membershipId {string} The ID of the organization membership to update (format: "om_...").
+	 * @param options {string} JSON string with update options. Format:
+	 *  {
+	 *    "roleSlug": "admin" // Optional: The new role slug to assign to the user
+	 *  }
+	 * @return {Promise<any>} The updated organization membership.
+	 */
+	async updateOrganizationMembership(membershipId: string, options: string) {
+		// Parse the JSON string
+		const parsedOptions = JSON.parse(
+			options
+		) as UpdateOrganizationMembershipOptions
+
+		return await updateOrganizationMembership(
+			this.env,
+			membershipId,
+			parsedOptions
+		)
+	}
+
+	/**
+	 * Delete an organization membership from WorkOS.
+	 * @param membershipId {string} The ID of the organization membership to delete (format: "om_...").
+	 * @return {Promise<any>} Confirmation of deletion with success status and the deleted membership ID.
+	 */
+	async deleteOrganizationMembership(membershipId: string) {
+		return await deleteOrganizationMembership(this.env, membershipId)
+	}
+
+	/**
+	 * Deactivate an organization membership in WorkOS.
+	 * @param membershipId {string} The ID of the organization membership to deactivate (format: "om_...").
+	 * @return {Promise<any>} The deactivated organization membership with status set to "inactive".
+	 */
+	async deactivateOrganizationMembership(membershipId: string) {
+		return await deactivateOrganizationMembership(this.env, membershipId)
+	}
+
+	/**
+	 * Reactivate an organization membership in WorkOS.
+	 * @param membershipId {string} The ID of the organization membership to reactivate (format: "om_...").
+	 * @return {Promise<any>} The reactivated organization membership with status set to "active".
+	 */
+	async reactivateOrganizationMembership(membershipId: string) {
+		return await reactivateOrganizationMembership(this.env, membershipId)
 	}
 }
