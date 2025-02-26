@@ -1,11 +1,10 @@
-import { WorkOS } from "@workos-inc/node"
 import type {
 	CreateOrganizationOptions,
 	CreateOrganizationRequestOptions,
 	ListOrganizationsOptions,
 	UpdateOrganizationOptions
 } from "@workos-inc/node"
-import { MCPResponse } from "../utils"
+import { MCPResponse, getWorkOSClient } from "../utils"
 
 export async function listOrganizations(
 	env: Env,
@@ -14,7 +13,7 @@ export async function listOrganizations(
 	before?: string,
 	after?: string
 ) {
-	const workos = new WorkOS(env.WORKOS_API_KEY)
+	const workos = getWorkOSClient(env)
 
 	const options: ListOrganizationsOptions = {}
 	if (domains) options.domains = domains
@@ -32,7 +31,7 @@ export async function createOrganization(
 	payload: CreateOrganizationOptions,
 	requestOptions?: CreateOrganizationRequestOptions
 ) {
-	const workos = new WorkOS(env.WORKOS_API_KEY)
+	const workos = getWorkOSClient(env)
 
 	const organization = await workos.organizations.createOrganization(
 		payload,
@@ -43,7 +42,7 @@ export async function createOrganization(
 }
 
 export async function deleteOrganization(env: Env, id: string) {
-	const workos = new WorkOS(env.WORKOS_API_KEY)
+	const workos = getWorkOSClient(env)
 
 	await workos.organizations.deleteOrganization(id)
 
@@ -51,7 +50,7 @@ export async function deleteOrganization(env: Env, id: string) {
 }
 
 export async function getOrganization(env: Env, id: string) {
-	const workos = new WorkOS(env.WORKOS_API_KEY)
+	const workos = getWorkOSClient(env)
 
 	const organization = await workos.organizations.getOrganization(id)
 
@@ -62,7 +61,7 @@ export async function updateOrganization(
 	env: Env,
 	options: UpdateOrganizationOptions
 ) {
-	const workos = new WorkOS(env.WORKOS_API_KEY)
+	const workos = getWorkOSClient(env)
 
 	const organization = await workos.organizations.updateOrganization(options)
 
@@ -76,7 +75,7 @@ export async function listOrganizationRoles(
 	after?: string,
 	before?: string
 ) {
-	const workos = new WorkOS(env.WORKOS_API_KEY)
+	const workos = getWorkOSClient(env)
 
 	const options = {
 		organizationId,

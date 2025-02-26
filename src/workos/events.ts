@@ -1,6 +1,5 @@
 import type { EventName } from "@workos-inc/node"
-import { WorkOS } from "@workos-inc/node"
-import { MCPResponse } from "../utils"
+import { MCPResponse, getWorkOSClient } from "../utils"
 
 export async function listEvents(
 	env: Env,
@@ -11,7 +10,7 @@ export async function listEvents(
 	after?: string,
 	organizationId?: string
 ) {
-	const workos = new WorkOS(env.WORKOS_API_KEY)
+	const workos = getWorkOSClient(env)
 
 	const options: {
 		events: EventName[]
