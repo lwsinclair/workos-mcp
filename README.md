@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/zueai-workos-mcp-badge.png)](https://mseep.ai/app/zueai-workos-mcp)
+
 # workos-mcp
 
 This is a lightweight Model Control Protocol (MCP) server bootstrapped with [create-mcp](https://github.com/zueai/create-mcp), and deployed on Cloudflare Workers.
